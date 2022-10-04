@@ -27,13 +27,17 @@ contract BurgerShop{
 
     modifier isOwner() {
 
-        require(msg.sender == owner);
+        require(msg.sender == owner , "The Sender should be owner!!");
+        _;
+    }
+
+    modifier canBeBought(Burger storage burger){
+
+        require(msg.value >= burger.cost , "The Cost the burger is more");
+        require(burger.currentStage == Stages.readyToOrder , "The burger is not ready to be ordered!!");
+        require(burger.totalSupply > burger.currentSupply);
+
         _;
     }
 
     
-
-    
-
-
-}
