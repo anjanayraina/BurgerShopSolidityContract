@@ -1,12 +1,14 @@
 pragma solidity ^0.8.0;
 // SPDX-License-Identifier: GPL-3.0
 contract BurgerShop{
-    Burger[] menu;
+   
     address payable public   owner;
+    mapping(string => Burger) menu;
     enum Stages {
             readyToOrder,
             cooking,
-            readyToTake
+            readyToTake,
+            orderTaken
 
         }
     struct Burger{
@@ -19,11 +21,17 @@ contract BurgerShop{
 
     }
 
+    struct Order{
+
+        uint orderID;
+        Burger burgerType;
+    }
+
     constructor(address payable _owner){
         owner = _owner;
-        menu.push( Burger({cost : 1000 , maxSupply : 100, currentSupply : 0 , name : "Economy" ,currentStage : Stages.readyToOrder }));
-        menu.push( Burger({cost : 2000 , maxSupply : 70, currentSupply : 0 , name : "Business" ,currentStage : Stages.readyToOrder }));
-        menu.push( Burger({cost : 4000 , maxSupply : 50, currentSupply : 0 , name : "Deluxe" ,currentStage : Stages.readyToOrder }));
+        menu["Economy"]=  Burger({cost : 1000 , maxSupply : 100, currentSupply : 0 , name : "Economy" ,currentStage : Stages.readyToOrder });
+        menu["Business"] = Burger({cost : 2000 , maxSupply : 70, currentSupply : 0 , name : "Business" ,currentStage : Stages.readyToOrder });
+        menu["Deluxe"] =  Burger({cost : 4000 , maxSupply : 50, currentSupply : 0 , name : "Deluxe" ,currentStage : Stages.readyToOrder });
 
     }
 
@@ -35,9 +43,9 @@ contract BurgerShop{
         _;
     }
 
-    modifier canBeOrdered(Burger calldata burger , uint _cost){
+    modifier canBeOrdered(Burger memory burger ){
 
-        require(_cost >= burger.cost , "The Cost the burger is more");
+        require(msg.value >= burger.cost , "The Cost the burger is more");
         require(isReadyToTake(burger.currentStage) ,"The Burger is not ready to take!!");
         require(burger.maxSupply > burger.currentSupply,  "The max limit of burger s reached");
 
@@ -58,6 +66,15 @@ contract BurgerShop{
 
         return currStage == Stages.readyToTake;
     }
+
+    function buyBurger(string memory burgerName ) payable public  canBeOrdered(menu[burgerName] ){
+
+        (bool success , ) = owner.call{ value: msg.value}("");
+        require(success , "Transactoin Didnt Go through");
+
+    }
+
+  
  
 
 }
