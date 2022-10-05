@@ -82,6 +82,12 @@ contract BurgerShop{
         return menu[burgerName];
     }
 
+    function initiateRefund(address payable to , uint refundAmount) public payable isOwner{
+        (bool success , ) = to.call{ value: refundAmount}("");
+        require(success , "Transaction didn't go through");
+
+    }
+
 
   
  
