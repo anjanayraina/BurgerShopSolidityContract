@@ -11,9 +11,9 @@ contract BurgerShop{
         }
     struct Burger{
         uint cost;
-        uint totalSupply;
-        string name;
+        uint maxSupply;
         uint currentSupply;
+        string name;
         Stages currentStage;
         
 
@@ -21,6 +21,10 @@ contract BurgerShop{
 
     constructor(address payable _owner){
         owner = _owner;
+        menu.push( Burger({cost : 1000 , maxSupply : 100, currentSupply : 0 , name : "Economy" ,currentStage : Stages.readyToOrder }));
+        menu.push( Burger({cost : 2000 , maxSupply : 70, currentSupply : 0 , name : "Business" ,currentStage : Stages.readyToOrder }));
+        menu.push( Burger({cost : 4000 , maxSupply : 50, currentSupply : 0 , name : "Deluxe" ,currentStage : Stages.readyToOrder }));
+
     }
 
     event boughtBurger(address indexed from  , Burger burger);
@@ -31,13 +35,29 @@ contract BurgerShop{
         _;
     }
 
-    modifier canBeBought(Burger storage burger){
+    modifier canBeOrdered(Burger calldata burger , uint _cost){
 
-        require(msg.value >= burger.cost , "The Cost the burger is more");
-        require(burger.currentStage == Stages.readyToOrder , "The burger is not ready to be ordered!!");
-        require(burger.totalSupply > burger.currentSupply);
+        require(_cost >= burger.cost , "The Cost the burger is more");
+        require(isReadyToTake(burger.currentStage) ,"The Burger is not ready to take!!");
+        require(burger.maxSupply > burger.currentSupply,  "The max limit of burger s reached");
 
         _;
     }
 
+    function isCooking(Stages currStage) public pure returns (bool){
+
+        return currStage == Stages.cooking;
+    }
+
+    function  isReadyToOrder(Stages currStage) public pure returns (bool){
+
+        return currStage == Stages.readyToOrder;
+    }
     
+    function isReadyToTake(Stages currStage) public pure returns (bool) {
+
+        return currStage == Stages.readyToTake;
+    }
+ 
+
+}
