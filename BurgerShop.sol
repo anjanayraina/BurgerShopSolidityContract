@@ -1,5 +1,6 @@
-pragma solidity ^0.8.0;
 // SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.0;
+
 contract BurgerShop{
    
     address payable public   owner;
@@ -21,11 +22,6 @@ contract BurgerShop{
 
     }
 
-    struct Order{
-
-        uint orderID;
-        Burger burgerType;
-    }
 
     constructor(address payable _owner){
         owner = _owner;
@@ -35,7 +31,7 @@ contract BurgerShop{
 
     }
 
-    event boughtBurger(address indexed from  , Burger burger);
+    event boughtBurger(address indexed by  , Burger burger);
 
     modifier isOwner() {
 
@@ -67,12 +63,21 @@ contract BurgerShop{
         return currStage == Stages.readyToTake;
     }
 
-    function buyBurger(string memory burgerName ) payable public  canBeOrdered(menu[burgerName] ){
+    function buyBurger(string calldata burgerName ,address buyer ) payable public  canBeOrdered(menu[burgerName] ){
 
         (bool success , ) = owner.call{ value: msg.value}("");
-        require(success , "Transactoin Didnt Go through");
+        require(success , "Transaction didn't go through");
+        emit boughtBurger(buyer , getBurger(burgerName));
 
     }
+
+    function getBurgerPrice(string memory burgerName) public view returns(uint){
+        return menu[burgerName].cost;
+    }
+    function getBurger(string memory burgerName) public view returns (Burger memory){
+        return menu[burgerName];
+    }
+
 
   
  
