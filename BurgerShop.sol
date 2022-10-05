@@ -23,11 +23,11 @@ contract BurgerShop{
     }
 
 
-    constructor(address payable _owner){
-        owner = _owner;
-        menu["Economy"]=  Burger({cost : 1000 , maxSupply : 100, currentSupply : 0 , name : "Economy" ,currentStage : Stages.readyToOrder });
-        menu["Business"] = Burger({cost : 2000 , maxSupply : 70, currentSupply : 0 , name : "Business" ,currentStage : Stages.readyToOrder });
-        menu["Deluxe"] =  Burger({cost : 4000 , maxSupply : 50, currentSupply : 0 , name : "Deluxe" ,currentStage : Stages.readyToOrder });
+    constructor() payable{
+        owner = payable(msg.sender);
+        menu["Economy"]=  Burger({cost : 0.0000001 ether , maxSupply : 100, currentSupply : 0 , name : "Economy" ,currentStage : Stages.readyToOrder });
+        menu["Business"] = Burger({cost : 0.000002 ether , maxSupply : 70, currentSupply : 0 , name : "Business" ,currentStage : Stages.readyToOrder });
+        menu["Deluxe"] =  Burger({cost : 0.000005 ether , maxSupply : 50, currentSupply : 0 , name : "Deluxe" ,currentStage : Stages.readyToOrder });
 
     }
 
@@ -48,6 +48,10 @@ contract BurgerShop{
         _;
     }
 
+    function chageStage(Stages newStage ,string memory burgerName) public view isOwner{
+        getBurger(burgerName).currentStage = newStage;
+    }
+
     function isCooking(Stages currStage) public pure returns (bool){
 
         return currStage == Stages.cooking;
@@ -63,11 +67,11 @@ contract BurgerShop{
         return currStage == Stages.readyToTake;
     }
 
-    function buyBurger(string calldata burgerName ,address buyer ) payable public  canBeOrdered(menu[burgerName] ){
+    function buyBurger(string calldata burgerName  ) payable public  canBeOrdered(menu[burgerName] ){
 
         (bool success , ) = owner.call{ value: msg.value}("");
         require(success , "Transaction didn't go through");
-        emit boughtBurger(buyer , getBurger(burgerName));
+        emit boughtBurger(msg.sender , getBurger(burgerName));
 
     }
 
